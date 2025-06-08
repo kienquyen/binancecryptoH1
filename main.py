@@ -390,9 +390,19 @@ def is_sell_signal(df: pd.DataFrame, trade_count: int) -> bool:
 #print(fetch_latest_price())
 #CHART THE BUY SIGNAL
 
-def plot_signal_chart(symbol):
-    df = fetch_klines(symbol, interval='1h', limit=100)
+def plot_signal_chart(symbol, interval='1h'):
+    df = fetch_klines(symbol, interval=interval, limit=100)
 
+    # === Determine bar size
+    bar_size_hours = 1  # default
+
+    if 'h' in interval:
+        bar_size_hours = int(interval.replace('h', ''))
+    elif 'm' in interval:
+        bar_size_hours = int(interval.replace('m', '')) / 60
+    elif 'd' in interval:
+        bar_size_hours = 24
+    
     # === Format time ===
     df['datetime'] = pd.to_datetime(df['time'], unit='ms')
     df['date_num'] = mdates.date2num(df['datetime'])
@@ -429,7 +439,10 @@ def plot_signal_chart(symbol):
 
 
     # === Extend future timestamps for cloud (26 periods forward)
-    future_dates = [df['datetime'].iloc[-1] + timedelta(hours=4 * (i + 1)) for i in range(cloud_offset)]
+    future_dates = [
+    df['datetime'].iloc[-1] + timedelta(hours=bar_size_hours * (i + 1))
+    for i in range(cloud_offset)
+    ]
     future_date_nums = mdates.date2num(future_dates)
 
     # Get last 26 values from original senkou A/B to project forward
@@ -523,7 +536,7 @@ def plot_signal_chart(symbol):
     ax.legend(loc='upper right', fontsize=11, frameon=False)
     ax.tick_params(axis='both', labelsize=10)
     ax.set_facecolor("#fbfbfb")
-    ax.set_title(f"{symbol} – 4H Chart with EMA & Indicators", fontsize=18, weight='bold', color='#2c3e50')
+    ax.set_title(f"{symbol} – {interval.upper()} Chart with EMA & Indicators", fontsize=18, weight='bold', color='#2c3e50')
 
     # === Save & Send ===
     output_file = f"{symbol}_signal_chart.png"
