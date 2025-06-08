@@ -12,8 +12,6 @@ from datetime import timedelta
 from datetime import datetime, timezone
 
 # === CONFIGURATION ===
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN") or "YOUR_TELEGRAM_BOT_TOKEN"
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID") or "YOUR_CHAT_ID"
 TIMEFRAME = os.getenv("SCAN_TIMEFRAME") or '1h'  # or '1h', '1d'
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL") or "YOUR_DISCORD_WEBHOOK_URL"
 
@@ -390,11 +388,10 @@ def is_sell_signal(df: pd.DataFrame, trade_count: int) -> bool:
 
 # === TEST FETCH PRICE LOCALLY ===
 #print(fetch_latest_price())
-#CHART THE SIGNAL
 #CHART THE BUY SIGNAL
 
 def plot_signal_chart(symbol):
-    df = fetch_klines(symbol, interval='4h', limit=100)
+    df = fetch_klines(symbol, interval='1h', limit=100)
 
     # === Format time ===
     df['datetime'] = pd.to_datetime(df['time'], unit='ms')
